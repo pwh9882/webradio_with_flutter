@@ -10,6 +10,9 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
+    // for (var radio in RadioList.radioList) {
+    //   print(parseTitle(radio));
+    // }
     return Scaffold(
       body: Column(children: [
         // 제목 디스플레이
@@ -25,7 +28,7 @@ class _HomePageState extends State<HomePage> {
                   flex: 2,
                   child: Center(
                     child: Text(
-                      '리스트에서 선택해주세요',
+                      '리스트에서! 선택해주세요',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 30,
