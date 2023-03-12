@@ -39,8 +39,20 @@ class _HomePageState extends State<HomePage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: const [
-                      Text('라디오'),
-                      Text('00.00hz'),
+                      Text(
+                        '라디오',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        '00.00hz',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -59,7 +71,7 @@ class _HomePageState extends State<HomePage> {
               itemBuilder: (context, index) {
                 return Container(
                   padding:
-                      const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 18),
                   decoration: BoxDecoration(
                     border: Border.all(
                       color: Colors.green,
@@ -68,8 +80,20 @@ class _HomePageState extends State<HomePage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('$index'),
-                      const Text('00.00hz'),
+                      Text(
+                        '$index',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const Text(
+                        '00.00hz',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ],
                   ),
                 );
@@ -89,12 +113,14 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Expanded(child: SizedBox()),
-                IconButton(
-                    iconSize: 70,
-                    onPressed: () {
-                      print("play clicked");
-                    },
-                    icon: const Icon(Icons.play_circle_fill)),
+                Center(
+                  child: IconButton(
+                      iconSize: 70,
+                      onPressed: () {
+                        print("play clicked");
+                      },
+                      icon: const Icon(Icons.play_circle_fill)),
+                ),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.end,
