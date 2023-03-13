@@ -1,18 +1,81 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:webradio_with_flutter/models/radio_channel.dart';
+import 'package:webradio_with_flutter/services/audio_service.dart';
+import 'package:webradio_with_flutter/services/parse_hls_slug.dart';
+import 'package:webradio_with_flutter/services/parse_title.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final MyAudioHandler audioHandler;
+
+  const HomePage({super.key, required this.audioHandler});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  bool isPlaying = false;
+  RadioChannel? selectedRadio;
+  String selectedRadioTitle = "리스트에서 선택해 주세요";
+  String selectedRadioType = "라디오";
+  String selectedRadioFreq = "00.00㎒";
+
+  void onPauseButtonClicked() {
+    isPlaying = false;
+    widget.audioHandler.pause();
+    setState(() {});
+  }
+
+  void loadHlsSlugAndPlay() async {
+    // hls 주소를 불러와 오디오 재생
+    var hlsSlug = selectedRadio?.radioHlsSlug;
+    hlsSlug ??= await parseHlsSlugFromApiSlug(selectedRadio!);
+
+    var audioItem = MediaItem(
+      id: hlsSlug,
+      album: 'Album name',
+      title: 'Track title',
+      artist: 'Artist name',
+      // artUri: Uri.parse('https://example.com/album.jpg'),
+    );
+    widget.audioHandler.playMediaItem(audioItem);
+  }
+
+  void loadTitle() async {
+    selectedRadioTitle = await parseTitle(selectedRadio!);
+    setState(() {});
+  }
+
+  void onPlayButtonClicked() {
+    if (selectedRadio == null) {
+    } else {
+      // 변수 초기화
+      isPlaying = false;
+      widget.audioHandler.pause();
+      selectedRadioTitle = "로딩중...";
+      selectedRadioType = selectedRadio!.radioType;
+      selectedRadioFreq = selectedRadio!.radioFreq;
+
+      loadHlsSlugAndPlay();
+      loadTitle();
+      // widget.audioHandler._notifyAudioHandlerAboutPlaybackEvents();
+
+      print("play!");
+
+      //
+
+      setState(() {});
+    }
+    isPlaying = true;
+  }
+
   @override
   Widget build(BuildContext context) {
     // for (var radio in RadioList.radioList) {
     //   print(parseTitle(radio));
     // }
+
     return Scaffold(
       body: Column(children: [
         // 제목 디스플레이
@@ -24,13 +87,13 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Flexible(
+                Flexible(
                   flex: 2,
                   child: Center(
                     child: Text(
-                      '리스트에서! 선택해주세요',
+                      selectedRadioTitle,
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.w600,
                       ),
@@ -41,17 +104,17 @@ class _HomePageState extends State<HomePage> {
                   flex: 1,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: const [
+                    children: [
                       Text(
-                        '라디오',
-                        style: TextStyle(
+                        selectedRadioType,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       Text(
-                        '00.00hz',
-                        style: TextStyle(
+                        selectedRadioFreq,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
                         ),
@@ -70,34 +133,44 @@ class _HomePageState extends State<HomePage> {
             decoration: BoxDecoration(color: Colors.blue.shade200),
             child: ListView.separated(
               padding: EdgeInsets.zero,
-              itemCount: 20,
+              itemCount: RadioChannelList.radioList.length,
               itemBuilder: (context, index) {
-                return Container(
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 12, horizontal: 18),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.green,
+                var radio = RadioChannelList.radioList[index];
+                return GestureDetector(
+                  onTap: () {
+                    selectedRadio = radio;
+                    onPlayButtonClicked();
+                    // print(radio.radioTitle);
+
+                    // RadioPlayer.playRadio(radio);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 18),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.green,
+                      ),
                     ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '$index',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          radio.radioTitle,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                      const Text(
-                        '00.00hz',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
+                        Text(
+                          radio.radioFreq,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 );
               },
@@ -119,10 +192,12 @@ class _HomePageState extends State<HomePage> {
                 Center(
                   child: IconButton(
                       iconSize: 70,
-                      onPressed: () {
-                        print("play clicked");
-                      },
-                      icon: const Icon(Icons.play_circle_fill)),
+                      onPressed: isPlaying
+                          ? onPauseButtonClicked
+                          : onPlayButtonClicked,
+                      icon: isPlaying
+                          ? const Icon(Icons.pause_circle_filled)
+                          : const Icon(Icons.play_circle_fill)),
                 ),
                 Expanded(
                   child: Column(

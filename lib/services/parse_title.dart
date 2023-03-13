@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:cp949_codec/cp949_codec.dart';
 import 'package:http/http.dart' as http;
 
-import 'package:webradio_with_flutter/models/radio.dart';
+import 'package:webradio_with_flutter/models/radio_channel.dart';
 
-Future<String> parseTitle(Radio radio) async {
+Future<String> parseTitle(RadioChannel radio) async {
   var titleText = '리스트에서 선택해주세요';
   http.Response response;
   switch (radio.radioType) {
@@ -30,14 +30,14 @@ Future<String> parseTitle(Radio radio) async {
           jsonText.indexOf(');'),
         );
         var jObject = jsonDecode(jsonText);
-        titleText = jObject[RadioList.radioList.indexOf(radio)]["schedules"][0]
-                ["program_title"]
+        titleText = jObject[RadioChannelList.radioList.indexOf(radio)]
+                ["schedules"][0]["program_title"]
             .toString();
       }
       break;
 
     case "MBC":
-      var url = RadioList.radioList.indexOf(radio) == 4
+      var url = RadioChannelList.radioList.indexOf(radio) == 4
           ? "http://control.imbc.com/Schedule/Radio/Time?sType=FM"
           : "http://control.imbc.com/Schedule/Radio/Time?sType=FM4U";
       response = await http.get(
@@ -48,7 +48,7 @@ Future<String> parseTitle(Radio radio) async {
       break;
 
     case "CBS":
-      var url = RadioList.radioList.indexOf(radio) == 8
+      var url = RadioChannelList.radioList.indexOf(radio) == 8
           ? "http://www.cbs.co.kr/cbsplayer/rainbow/widget/timetable.asp?ch=2"
           : "http://www.cbs.co.kr/cbsplayer/rainbow/widget/timetable.asp?ch=4";
       response = await http.get(

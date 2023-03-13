@@ -1,7 +1,22 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:webradio_with_flutter/screens/home_page.dart';
+import 'package:webradio_with_flutter/services/audio_service.dart';
 
-void main() {
+late MyAudioHandler _audioHandler; // singleton.
+
+Future<void> main() async {
+  // store this in a singleton
+  _audioHandler = await AudioService.init(
+    builder: () => MyAudioHandler(),
+    config: const AudioServiceConfig(
+        androidNotificationChannelId:
+            'com.woohyeok.webradiowithflutter.channel.audio',
+        androidNotificationChannelName: 'Music playback',
+        androidNotificationOngoing: true,
+        androidStopForegroundOnPause: true,
+        androidNotificationIcon: 'mipmap/ic_launcher'),
+  );
   runApp(const MyApp());
 }
 
@@ -25,7 +40,9 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: const HomePage(),
+      home: HomePage(
+        audioHandler: _audioHandler,
+      ),
     );
   }
 }
