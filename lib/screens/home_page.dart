@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:webradio_with_flutter/models/radio_channel.dart';
@@ -20,10 +22,13 @@ class _HomePageState extends State<HomePage> {
   String selectedRadioTitle = "리스트에서 선택해 주세요";
   String selectedRadioType = "라디오";
   String selectedRadioFreq = "00.00㎒";
+  Timer? timer;
+  StreamSubscription<PlaybackState>? _playerStateSubscription;
 
   void onPauseButtonClicked() {
     isPlaying = false;
     widget.audioHandler.pause();
+    // timer?.cancel();
     setState(() {});
   }
 
@@ -39,11 +44,13 @@ class _HomePageState extends State<HomePage> {
       artist: 'Artist name',
       // artUri: Uri.parse('https://example.com/album.jpg'),
     );
+    // widget.audioHandler.();
     widget.audioHandler.playMediaItem(audioItem);
   }
 
-  void loadTitle() async {
+  void loadTitle(Timer timer) async {
     selectedRadioTitle = await parseTitle(selectedRadio!);
+    // widget.audioHandler.queueTitle = 'asf'; // print("Timer running.....");
     setState(() {});
   }
 
@@ -58,20 +65,23 @@ class _HomePageState extends State<HomePage> {
       selectedRadioFreq = selectedRadio!.radioFreq;
 
       loadHlsSlugAndPlay();
-      loadTitle();
+
+      timer?.cancel();
+      timer = Timer.periodic(const Duration(seconds: 30), loadTitle);
+      loadTitle(timer!);
       // widget.audioHandler._notifyAudioHandlerAboutPlaybackEvents();
 
       print("play!");
 
       //
-
+      isPlaying = true;
       setState(() {});
     }
-    isPlaying = true;
   }
 
   void _listenToPlaybackState() {
-    widget.audioHandler.playbackState.listen((playbackState) {
+    _playerStateSubscription =
+        widget.audioHandler.playbackState.listen((playbackState) {
       isPlaying = playbackState.playing;
       final processingState = playbackState.processingState;
       if (processingState == AudioProcessingState.loading ||
@@ -87,6 +97,12 @@ class _HomePageState extends State<HomePage> {
       }
       setState(() {});
     });
+  }
+
+  @override
+  void dispose() {
+    _playerStateSubscription?.cancel();
+    super.dispose();
   }
 
   @override
