@@ -70,12 +70,31 @@ class _HomePageState extends State<HomePage> {
     isPlaying = true;
   }
 
+  void _listenToPlaybackState() {
+    widget.audioHandler.playbackState.listen((playbackState) {
+      isPlaying = playbackState.playing;
+      final processingState = playbackState.processingState;
+      if (processingState == AudioProcessingState.loading ||
+          processingState == AudioProcessingState.buffering) {
+        // playButtonNotifier.value = ButtonState.loading;
+      } else if (!isPlaying) {
+        // playButtonNotifier.value = ButtonState.paused;
+      } else if (processingState != AudioProcessingState.completed) {
+        // playButtonNotifier.value = ButtonState.playing;
+      } else {
+        // widget.audioHandler.seek(Duration.zero);
+        widget.audioHandler.pause();
+      }
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // for (var radio in RadioList.radioList) {
     //   print(parseTitle(radio));
     // }
-
+    _listenToPlaybackState();
     return Scaffold(
       body: Column(children: [
         // 제목 디스플레이
