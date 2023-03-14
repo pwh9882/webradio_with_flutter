@@ -41,13 +41,12 @@ class MyAudioHandler extends BaseAudioHandler
       playing: true,
       controls: [MediaControl.pause],
     ));
-
     await _player.play();
   }
 
   @override
   Future<void> playMediaItem(MediaItem mediaItem) {
-    _player.setUrl(mediaItem.id);
+    _player.setUrl(mediaItem.id, preload: false);
 
     // playbackState.add(playbackState.value
     //     .copyWith(processingState: AudioProcessingState.idle));
@@ -59,6 +58,20 @@ class MyAudioHandler extends BaseAudioHandler
 
     _player.play();
     return super.playMediaItem(mediaItem);
+  }
+
+  updateCurrentMediaItemTitle(
+    String title,
+  ) async {
+    // print(mediaItem.value);
+    var item = MediaItem(
+      id: mediaItem.value!.id,
+      album: mediaItem.value!.album,
+      title: title,
+      artUri: mediaItem.value!.artUri,
+    );
+    clearQueue();
+    mediaItem.add(item);
   }
 
   @override

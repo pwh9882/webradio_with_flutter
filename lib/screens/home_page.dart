@@ -25,12 +25,17 @@ class _HomePageState extends State<HomePage> {
   Timer? timer;
   StreamSubscription<PlaybackState>? _playerStateSubscription;
   String? selectedRadioHlsSlug;
+  final artUri = 'https://pub.dev/static/hash-7ce71c4e/img/pub-dev-logo-2x.png';
+
+  Uri myImageUri =
+      Uri.parse('package:webradio_with_flutter/images/radio_icon.png');
 
   void onPauseButtonClicked() {
     isPlaying = false;
     widget.audioHandler.pause();
-    // timer?.cancel();
-    setState(() {});
+
+    //_listenToPlaybackState에서 setState 책임짐
+    // setState(() {});
   }
 
   void loadHlsSlugAndPlay() async {
@@ -41,15 +46,14 @@ class _HomePageState extends State<HomePage> {
     var audioItem = MediaItem(
       id: selectedRadioHlsSlug!,
       album: selectedRadioChannelTitle,
-      title: 'Title Defualt',
-      // artist: 'Artist name',
-      // artUri: Uri.parse(
-      //     'file:///Users/woohyeok/AndroidStudioProjects/WebRadioApplicationWithFlutter/webradio_with_flutter/lib/imgs/radio_icon.png'),
+      title: '',
+      // artUri: Uri.parse(artUri),
+      artUri: myImageUri,
     );
-    // widget.audioHandler.();
     widget.audioHandler.clearQueue();
     widget.audioHandler.mediaItem.add(audioItem);
     widget.audioHandler.playMediaItem(audioItem);
+    isPlaying = true;
 
     timer?.cancel();
     timer = Timer.periodic(const Duration(seconds: 30), loadTitle);
@@ -58,54 +62,33 @@ class _HomePageState extends State<HomePage> {
 
   void loadTitle(Timer timer) async {
     selectedRadioTitle = await parseTitle(selectedRadio!);
-    var audioItem = MediaItem(
-      id: selectedRadioHlsSlug!,
-      album: selectedRadioChannelTitle,
-      title: selectedRadioTitle,
-      // artist: 'Artist name',
-      // artUri: Uri.parse(
-      //     'file:///Users/woohyeok/AndroidStudioProjects/WebRadioApplicationWithFlutter/webradio_with_flutter/lib/imgs/radio_icon.png'),
-    );
-    // widget.audioHandler.queueTitle = 'asf'; // print("Timer running.....");
-    widget.audioHandler.clearQueue();
-    widget.audioHandler.mediaItem.add(audioItem);
-    setState(() {});
+    widget.audioHandler.updateCurrentMediaItemTitle(selectedRadioTitle);
+
+    //_listenToPlaybackState에서 setState 책임짐
+    // setState(() {});
   }
 
-  void onPlayButtonClicked() {
+  void onPlayButtonClicked() async {
     if (selectedRadio == null) {
     } else {
       // 변수 초기화
       isPlaying = false;
-      widget.audioHandler.pause();
+
+      await widget.audioHandler.pause();
+
       selectedRadioTitle = "로딩중...";
       selectedRadioChannelTitle = selectedRadio!.radioChannelTitle;
       selectedRadioFreq = selectedRadio!.radioFreq;
 
       loadHlsSlugAndPlay();
 
-      // widget.audioHandler._notifyAudioHandlerAboutPlaybackEvents();
-
-      print("play!");
-
-      //
-      isPlaying = true;
-      setState(() {});
+      // print("play!");
     }
   }
 
   void onExitButtonClicked() {
-    var audioItem = MediaItem(
-      id: selectedRadioHlsSlug!,
-      album: selectedRadioChannelTitle,
-      title: "asdf",
-      // artist: 'Artist name',
-      // artUri: Uri.parse(
-      //     'file:///Users/woohyeok/AndroidStudioProjects/WebRadioApplicationWithFlutter/webradio_with_flutter/lib/imgs/radio_icon.png'),
-    );
-    // widget.audioHandler.queueTitle = 'asf'; // print("Timer running.....");
-    widget.audioHandler.clearQueue();
-    widget.audioHandler.mediaItem.add(audioItem);
+    // widget.audioHandler.updateCurrentMediaItemTitle('안녕');
+    print(Uri.file('images/radio_icon.png'));
   }
 
   void _listenToPlaybackState() {
@@ -252,7 +235,10 @@ class _HomePageState extends State<HomePage> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Expanded(child: SizedBox()),
+                const Expanded(
+                    child: SizedBox(
+                        // child: Image.asset('images/audio_icon.png'),
+                        )),
                 Center(
                   child: IconButton(
                       iconSize: 70,
