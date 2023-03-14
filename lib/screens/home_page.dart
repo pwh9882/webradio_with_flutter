@@ -20,10 +20,11 @@ class _HomePageState extends State<HomePage> {
   bool isPlaying = false;
   RadioChannel? selectedRadio;
   String selectedRadioTitle = "리스트에서 선택해 주세요";
-  String selectedRadioType = "라디오";
+  String selectedRadioChannelTitle = "라디오";
   String selectedRadioFreq = "00.00㎒";
   Timer? timer;
   StreamSubscription<PlaybackState>? _playerStateSubscription;
+  String? selectedRadioHlsSlug;
 
   void onPauseButtonClicked() {
     isPlaying = false;
@@ -34,23 +35,40 @@ class _HomePageState extends State<HomePage> {
 
   void loadHlsSlugAndPlay() async {
     // hls 주소를 불러와 오디오 재생
-    var hlsSlug = selectedRadio?.radioHlsSlug;
-    hlsSlug ??= await parseHlsSlugFromApiSlug(selectedRadio!);
+    selectedRadioHlsSlug = selectedRadio?.radioHlsSlug;
+    selectedRadioHlsSlug ??= await parseHlsSlugFromApiSlug(selectedRadio!);
 
     var audioItem = MediaItem(
-      id: hlsSlug,
-      album: 'Album name',
-      title: 'Track title',
-      artist: 'Artist name',
-      // artUri: Uri.parse('https://example.com/album.jpg'),
+      id: selectedRadioHlsSlug!,
+      album: selectedRadioChannelTitle,
+      title: 'Title Defualt',
+      // artist: 'Artist name',
+      // artUri: Uri.parse(
+      //     'file:///Users/woohyeok/AndroidStudioProjects/WebRadioApplicationWithFlutter/webradio_with_flutter/lib/imgs/radio_icon.png'),
     );
     // widget.audioHandler.();
+    widget.audioHandler.clearQueue();
+    widget.audioHandler.mediaItem.add(audioItem);
     widget.audioHandler.playMediaItem(audioItem);
+
+    timer?.cancel();
+    timer = Timer.periodic(const Duration(seconds: 30), loadTitle);
+    loadTitle(timer!);
   }
 
   void loadTitle(Timer timer) async {
     selectedRadioTitle = await parseTitle(selectedRadio!);
+    var audioItem = MediaItem(
+      id: selectedRadioHlsSlug!,
+      album: selectedRadioChannelTitle,
+      title: selectedRadioTitle,
+      // artist: 'Artist name',
+      // artUri: Uri.parse(
+      //     'file:///Users/woohyeok/AndroidStudioProjects/WebRadioApplicationWithFlutter/webradio_with_flutter/lib/imgs/radio_icon.png'),
+    );
     // widget.audioHandler.queueTitle = 'asf'; // print("Timer running.....");
+    widget.audioHandler.clearQueue();
+    widget.audioHandler.mediaItem.add(audioItem);
     setState(() {});
   }
 
@@ -61,14 +79,11 @@ class _HomePageState extends State<HomePage> {
       isPlaying = false;
       widget.audioHandler.pause();
       selectedRadioTitle = "로딩중...";
-      selectedRadioType = selectedRadio!.radioType;
+      selectedRadioChannelTitle = selectedRadio!.radioChannelTitle;
       selectedRadioFreq = selectedRadio!.radioFreq;
 
       loadHlsSlugAndPlay();
 
-      timer?.cancel();
-      timer = Timer.periodic(const Duration(seconds: 30), loadTitle);
-      loadTitle(timer!);
       // widget.audioHandler._notifyAudioHandlerAboutPlaybackEvents();
 
       print("play!");
@@ -77,6 +92,20 @@ class _HomePageState extends State<HomePage> {
       isPlaying = true;
       setState(() {});
     }
+  }
+
+  void onExitButtonClicked() {
+    var audioItem = MediaItem(
+      id: selectedRadioHlsSlug!,
+      album: selectedRadioChannelTitle,
+      title: "asdf",
+      // artist: 'Artist name',
+      // artUri: Uri.parse(
+      //     'file:///Users/woohyeok/AndroidStudioProjects/WebRadioApplicationWithFlutter/webradio_with_flutter/lib/imgs/radio_icon.png'),
+    );
+    // widget.audioHandler.queueTitle = 'asf'; // print("Timer running.....");
+    widget.audioHandler.clearQueue();
+    widget.audioHandler.mediaItem.add(audioItem);
   }
 
   void _listenToPlaybackState() {
@@ -141,7 +170,7 @@ class _HomePageState extends State<HomePage> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Text(
-                        selectedRadioType,
+                        selectedRadioChannelTitle,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
@@ -191,7 +220,7 @@ class _HomePageState extends State<HomePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          radio.radioTitle,
+                          radio.radioChannelTitle,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
@@ -240,9 +269,7 @@ class _HomePageState extends State<HomePage> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       IconButton(
-                        onPressed: () {
-                          print("exit clicked");
-                        },
+                        onPressed: onExitButtonClicked,
                         icon: const Icon(Icons.exit_to_app),
                       ),
                     ],

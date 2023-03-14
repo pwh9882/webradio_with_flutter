@@ -48,6 +48,15 @@ class MyAudioHandler extends BaseAudioHandler
   @override
   Future<void> playMediaItem(MediaItem mediaItem) {
     _player.setUrl(mediaItem.id);
+
+    // playbackState.add(playbackState.value
+    //     .copyWith(processingState: AudioProcessingState.idle));
+    // updateMediaItem(mediaItem);
+    // this.mediaItem.add(mediaItem);
+    // this.mediaItem.
+    // playbackState.add(playbackState.value
+    //     .copyWith(processingState: AudioProcessingState.ready));
+
     _player.play();
     return super.playMediaItem(mediaItem);
   }
@@ -72,13 +81,13 @@ class MyAudioHandler extends BaseAudioHandler
         controls: [
           // MediaControl.skipToPrevious,
           if (playing) MediaControl.pause else MediaControl.play,
-          // MediaControl.stop,
+          MediaControl.stop,
           // MediaControl.skipToNext,
         ],
         systemActions: const {
           MediaAction.seek,
         },
-        androidCompactActionIndices: const [0, 1, 3],
+        androidCompactActionIndices: const [0],
         processingState: const {
           ProcessingState.idle: AudioProcessingState.idle,
           ProcessingState.loading: AudioProcessingState.loading,
@@ -93,5 +102,11 @@ class MyAudioHandler extends BaseAudioHandler
         queueIndex: event.currentIndex,
       ));
     });
+  }
+
+  void clearQueue() {
+    while (queue.value.isNotEmpty) {
+      queue.value.removeLast();
+    }
   }
 }

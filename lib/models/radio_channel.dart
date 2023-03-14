@@ -1,9 +1,9 @@
 class RadioChannel {
-  final String radioTitle, radioFreq, radioType, radioWebSlug;
+  final String radioChannelTitle, radioFreq, radioType, radioWebSlug;
   String? radioHlsSlug, radioApiSlug;
 
   RadioChannel({
-    required this.radioTitle,
+    required this.radioChannelTitle,
     required this.radioType,
     required this.radioFreq,
     required this.radioWebSlug,
@@ -17,7 +17,7 @@ class RadioChannel {
 class RadioChannelList {
   static final List<RadioChannel> radioList = [
     RadioChannel(
-      radioTitle: "KBS 제1라디오",
+      radioChannelTitle: "KBS 제1라디오",
       radioType: "KBS",
       radioFreq: "FM 97.3㎒",
       radioWebSlug:
@@ -26,7 +26,7 @@ class RadioChannelList {
           "https://cfpwwwapi.kbs.co.kr/api/v1/landing/live/channel_code/21/",
     ),
     RadioChannel(
-      radioTitle: "KBS 제2라디오",
+      radioChannelTitle: "KBS 제2라디오",
       radioType: "KBS",
       radioFreq: "FM 106.1㎒",
       radioWebSlug:
@@ -35,7 +35,7 @@ class RadioChannelList {
           "https://cfpwwwapi.kbs.co.kr/api/v1/landing/live/channel_code/22/",
     ),
     RadioChannel(
-      radioTitle: "KBS 1FM",
+      radioChannelTitle: "KBS 1FM",
       radioType: "KBS",
       radioFreq: "FM 93.1㎒",
       radioWebSlug:
@@ -44,7 +44,7 @@ class RadioChannelList {
           "https://cfpwwwapi.kbs.co.kr/api/v1/landing/live/channel_code/24/",
     ),
     RadioChannel(
-      radioTitle: "KBS 2FM",
+      radioChannelTitle: "KBS 2FM",
       radioType: "KBS",
       radioFreq: "FM 89.1㎒",
       radioWebSlug:
@@ -53,7 +53,7 @@ class RadioChannelList {
           "https://cfpwwwapi.kbs.co.kr/api/v1/landing/live/channel_code/25/",
     ),
     RadioChannel(
-      radioTitle: "MBC 라디오",
+      radioChannelTitle: "MBC 라디오",
       radioType: "MBC",
       radioFreq: "FM 95.9㎒",
       radioWebSlug: "http://mini.imbc.com/webapp_v3/mini.html?channel=sfm",
@@ -61,7 +61,7 @@ class RadioChannelList {
           "http://miniplay.imbc.com/WebHLS.ashx?channel=sfm&protocol=M3U8",
     ),
     RadioChannel(
-      radioTitle: "MBC FM4U",
+      radioChannelTitle: "MBC FM4U",
       radioType: "MBC",
       radioFreq: "FM 91.9㎒",
       radioWebSlug: "http://mini.imbc.com/webapp_v3/mini.html?channel=mfm",
@@ -69,7 +69,7 @@ class RadioChannelList {
           "http://miniplay.imbc.com/WebHLS.ashx?channel=mfm&protocol=M3U8",
     ),
     RadioChannel(
-      radioTitle: "SBS 러브FM",
+      radioChannelTitle: "SBS 러브FM",
       radioType: "SBS",
       radioFreq: "FM 103.5㎒",
       radioWebSlug: "http://play.sbs.co.kr/onair/pc/index.html?id=S08",
@@ -78,7 +78,7 @@ class RadioChannelList {
           "http://apis.sbs.co.kr/play-api/1.0/onair/channel/S08?protocol=hls",
     ),
     RadioChannel(
-      radioTitle: "SBS 파워FM",
+      radioChannelTitle: "SBS 파워FM",
       radioType: "SBS",
       radioFreq: "FM 107.7㎒",
       radioWebSlug: "http://play.sbs.co.kr/onair/pc/index.html?id=S07",
@@ -87,7 +87,7 @@ class RadioChannelList {
           "http://apis.sbs.co.kr/play-api/1.0/onair/channel/S07?protocol=hls",
     ),
     RadioChannel(
-      radioTitle: "CBS 음악FM",
+      radioChannelTitle: "CBS 음악FM",
       radioType: "CBS",
       radioFreq: "FM 93.9㎒",
       radioWebSlug: "http://www.cbs.co.kr/radio/frame/AodJwPlayer.asp#refresh",
@@ -96,7 +96,7 @@ class RadioChannelList {
       radioApiSlug: null,
     ),
     RadioChannel(
-      radioTitle: "CBS 표준FM",
+      radioChannelTitle: "CBS 표준FM",
       radioType: "CBS",
       radioFreq: "FM 98.1㎒",
       radioWebSlug: "http://www.cbs.co.kr/radio/frame/AodJwPlayer.asp",
@@ -105,7 +105,7 @@ class RadioChannelList {
       radioApiSlug: null,
     ),
     RadioChannel(
-      radioTitle: "TBS 교통방송",
+      radioChannelTitle: "TBS 교통방송",
       radioType: "TBS",
       radioFreq: "FM 95.1㎒",
       radioWebSlug: "http://tbs.seoul.kr/player/live.do?channelCode=CH_A",
@@ -121,7 +121,7 @@ class RadioChannelList {
 // radioApiSlug: null,
 // ),
     RadioChannel(
-      radioTitle: "EBS FM 교육방송",
+      radioChannelTitle: "EBS FM 교육방송",
       radioType: "EBS",
       radioFreq: "FM 104.5㎒",
       radioWebSlug: "http://www.ebs.co.kr/radio/home?mainTop",
