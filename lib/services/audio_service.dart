@@ -85,7 +85,17 @@ class MyAudioHandler extends BaseAudioHandler
   }
 
   @override
-  Future<void> stop() async {}
+  Future<void> stop() async {
+    // await _player.dispose();
+    // return super.stop();
+    playbackState.add(playbackState.value.copyWith(
+      controls: [MediaControl.stop],
+    ));
+  }
+
+  void dispose() async {
+    await _player.dispose();
+  }
 
   void _notifyAudioHandlerAboutPlaybackEvents() {
     _player.playbackEventStream.listen((PlaybackEvent event) {
@@ -98,7 +108,7 @@ class MyAudioHandler extends BaseAudioHandler
           // MediaControl.skipToNext,
         ],
         systemActions: const {
-          MediaAction.seek,
+          // MediaAction.seek,
         },
         androidCompactActionIndices: const [0],
         processingState: const {

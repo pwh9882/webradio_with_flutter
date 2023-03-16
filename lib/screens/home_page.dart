@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:webradio_with_flutter/models/radio_channel.dart';
 import 'package:webradio_with_flutter/services/audio_service.dart';
 import 'package:webradio_with_flutter/services/parse_hls_slug.dart';
@@ -25,10 +28,12 @@ class _HomePageState extends State<HomePage> {
   Timer? timer;
   StreamSubscription<PlaybackState>? _playerStateSubscription;
   String? selectedRadioHlsSlug;
-  final artUri = 'https://pub.dev/static/hash-7ce71c4e/img/pub-dev-logo-2x.png';
+  var isSelectedList = [
+    for (var iter = 0; iter < RadioChannelList.radioList.length; iter++) false
+  ];
 
   Uri myImageUri =
-      Uri.parse('package:webradio_with_flutter/images/radio_icon.png');
+      Uri.parse('package:webradio_with_flutter/images/radioIcon.png');
 
   void onPauseButtonClicked() {
     isPlaying = false;
@@ -36,6 +41,19 @@ class _HomePageState extends State<HomePage> {
 
     //_listenToPlaybackState에서 setState 책임짐
     // setState(() {});
+  }
+
+  Future<Uri> getImageFileFromAssets() async {
+    final byteData = await rootBundle.load('images/noti_art.jpeg');
+    final buffer = byteData.buffer;
+    Directory tempDir = await getApplicationDocumentsDirectory();
+
+    String tempPath = tempDir.path;
+    var filePath =
+        '$tempPath/file_01.png'; // file_01.tmp is dump file, can be anything
+    return (await File(filePath).writeAsBytes(
+            buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes)))
+        .uri;
   }
 
   void loadHlsSlugAndPlay() async {
@@ -47,8 +65,10 @@ class _HomePageState extends State<HomePage> {
       id: selectedRadioHlsSlug!,
       album: selectedRadioChannelTitle,
       title: '',
-      // artUri: Uri.parse(artUri),
-      artUri: myImageUri,
+      // artUri: Uri.file('images/radioIcon.png'),
+      artUri: await getImageFileFromAssets(),
+      // artUri: Uri.parse("file:///" "images/radioIcon.png")
+      // artUri: myImageUri,
     );
     widget.audioHandler.clearQueue();
     widget.audioHandler.mediaItem.add(audioItem);
@@ -86,9 +106,14 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  void onExitButtonClicked() {
-    // widget.audioHandler.updateCurrentMediaItemTitle('안녕');
-    print(Uri.file('images/radio_icon.png'));
+  void onExitButtonClicked() async {
+    widget.audioHandler.dispose();
+
+    if (Platform.isIOS) {
+      exit(0);
+    } else {
+      SystemNavigator.pop();
+    }
   }
 
   void _listenToPlaybackState() {
@@ -107,6 +132,11 @@ class _HomePageState extends State<HomePage> {
         // widget.audioHandler.seek(Duration.zero);
         widget.audioHandler.pause();
       }
+      if (playbackState.controls[0].label == 'Stop') {
+        onExitButtonClicked();
+        // print("\n\nStop!!!!!\n\n");
+      }
+      // print("\n\n\n${playbackState.controls[0].label}\n\n\n");
       setState(() {});
     });
   }
@@ -122,14 +152,22 @@ class _HomePageState extends State<HomePage> {
     // for (var radio in RadioList.radioList) {
     //   print(parseTitle(radio));
     // }
+    // print(isSelectedList.length);
     _listenToPlaybackState();
     return Scaffold(
       body: Column(children: [
         // 제목 디스플레이
         Flexible(
-          flex: 3,
+          flex: 10,
           child: Container(
-            decoration: const BoxDecoration(color: Colors.grey),
+            decoration: const BoxDecoration(
+              color: Colors.black,
+              image: DecorationImage(
+                fit: BoxFit.cover,
+                image: AssetImage('images/info_background.jpg'),
+                opacity: 0.65,
+              ),
+            ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -143,6 +181,7 @@ class _HomePageState extends State<HomePage> {
                       style: const TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.w600,
+                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -154,9 +193,12 @@ class _HomePageState extends State<HomePage> {
                     children: [
                       Text(
                         selectedRadioChannelTitle,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
+                          color: selectedRadio == null
+                              ? Colors.white
+                              : selectedRadio!.highlightColor,
                         ),
                       ),
                       Text(
@@ -164,6 +206,7 @@ class _HomePageState extends State<HomePage> {
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w600,
+                          color: Colors.white,
                         ),
                       ),
                     ],
@@ -175,28 +218,35 @@ class _HomePageState extends State<HomePage> {
         ),
         // 리스트뷰 라디오 목록
         Flexible(
-          flex: 3,
-          child: Container(
-            decoration: BoxDecoration(color: Colors.blue.shade200),
-            child: ListView.separated(
-              padding: EdgeInsets.zero,
-              itemCount: RadioChannelList.radioList.length,
-              itemBuilder: (context, index) {
-                var radio = RadioChannelList.radioList[index];
-                return GestureDetector(
+          flex: 8,
+          child: ListView.separated(
+            padding: EdgeInsets.zero,
+            itemCount: RadioChannelList.radioList.length,
+            itemBuilder: (context, index) {
+              var radio = RadioChannelList.radioList[index];
+              return Material(
+                color: isSelectedList[index]
+                    ? Color.lerp(radio.highlightColor, Colors.black, 0.5)
+                    : radio.highlightColor,
+                child: InkWell(
+                  splashColor: Colors.black54,
                   onTap: () {
+                    for (int iter = 0; iter < isSelectedList.length; iter++) {
+                      isSelectedList[iter] = false;
+                    }
+                    isSelectedList[index] = true;
                     selectedRadio = radio;
                     onPlayButtonClicked();
-                    // print(radio.radioTitle);
-
-                    // RadioPlayer.playRadio(radio);
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 12, horizontal: 18),
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.green,
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 8, horizontal: 18),
+                    decoration: const BoxDecoration(
+                      // color: radio.highlightColor,
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                     child: Row(
@@ -204,50 +254,67 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         Text(
                           radio.radioChannelTitle,
-                          style: const TextStyle(
-                            fontSize: 18,
+                          style: TextStyle(
+                            fontSize: 20,
                             fontWeight: FontWeight.w600,
+                            color: isSelectedList[index]
+                                ? Colors.white38
+                                : Colors.white,
                           ),
                         ),
                         Text(
                           radio.radioFreq,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
+                            color: isSelectedList[index]
+                                ? Colors.white38
+                                : Colors.white,
                           ),
                         ),
                       ],
                     ),
                   ),
-                );
-              },
-              separatorBuilder: (context, index) {
-                return const SizedBox(height: 1);
-              },
-            ),
+                ),
+              );
+            },
+            separatorBuilder: (context, index) {
+              return const SizedBox(height: 0);
+            },
           ),
         ),
         // 재생버튼
         Flexible(
-          flex: 1,
+          flex: 3,
           child: Container(
-            decoration: const BoxDecoration(color: Colors.blueGrey),
+            decoration: const BoxDecoration(
+              color: Colors.black,
+              image: DecorationImage(
+                fit: BoxFit.cover,
+                image: AssetImage('images/player_background.jpg'),
+                opacity: 0.7,
+              ),
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Expanded(
-                    child: SizedBox(
-                        // child: Image.asset('images/audio_icon.png'),
+                Expanded(
+                    child: Container(
+                        // child: Image.asset('images/radioIcon.png'),
                         )),
                 Center(
-                  child: IconButton(
-                      iconSize: 70,
-                      onPressed: isPlaying
-                          ? onPauseButtonClicked
-                          : onPlayButtonClicked,
-                      icon: isPlaying
-                          ? const Icon(Icons.pause_circle_filled)
-                          : const Icon(Icons.play_circle_fill)),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: IconButton(
+                        color: Colors.white,
+                        iconSize: 90,
+                        onPressed: isPlaying
+                            ? onPauseButtonClicked
+                            : onPlayButtonClicked,
+                        icon: isPlaying
+                            ? const Icon(Icons.pause_circle_filled)
+                            : const Icon(Icons.play_circle_fill)),
+                  ),
                 ),
                 Expanded(
                   child: Column(

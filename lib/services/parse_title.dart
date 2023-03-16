@@ -4,6 +4,7 @@ import 'package:cp949_codec/cp949_codec.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:webradio_with_flutter/models/radio_channel.dart';
+import 'package:webradio_with_flutter/models/time_table_tbs.dart';
 
 Future<String> parseTitle(RadioChannel radio) async {
   var titleText = '리스트에서 선택해주세요';
@@ -55,45 +56,31 @@ Future<String> parseTitle(RadioChannel radio) async {
         Uri.parse(url),
         headers: {'Content-Type': 'text/html; Charset=ks_c_5601-1987'},
       );
-      var localDate = DateTime.now().hour * 3600 +
-          DateTime.now().minute * 60 +
-          DateTime.now().second;
       // 사이트가 구식이라 디코딩을 cp949를 이용해야함.
       var aspText = cp949.decode(response.bodyBytes);
-      // aspText.replaceAll("	", " ");
-      // print(aspText);
-      // 별에 별 공백문자가 다 들어있어서 그냥 못 split함.
-      var textList = aspText.split(RegExp(r'\s+'));
-      // print(textList);
-      // for (var text in textList) {
-      //   print(text);
-      // }
+      final List<TimeTableFromTBS> arrTimeTable = [];
 
-      var start = int.parse(textList[0]);
-      var end = int.parse(textList[1]);
-      var endIndex = 1;
-      for (var i = 2; i < textList.length; i++) {
-        if (localDate >= start && localDate < end + 1) {
-          titleText = textList[endIndex + 2];
+      aspText = aspText.trim();
+      final arr = aspText.split("\n");
+
+      for (final line in arr) {
+        final item = line.split("\t");
+        arrTimeTable.add(TimeTableFromTBS(item[0], item[1], item[2], item[3],
+            item[4], item[5], item[6], item[7], item[8], item[9], item[10]));
+      }
+
+      // get current program
+      final curSec = DateTime.now().hour * 3600 +
+          DateTime.now().minute * 60 +
+          DateTime.now().second;
+
+      for (var i = arrTimeTable.length - 1; i >= 0; i--) {
+        if (int.parse(arrTimeTable[i].startTime!) < curSec) {
+          titleText = arrTimeTable[i].name!;
           break;
-        }
-        if (start == end) {
-          end = int.parse(textList[i - 1]);
-        }
-        if (textList[i] == end.toString()) {
-          start = end;
-          endIndex = i + 1;
         }
       }
-      for (var i = endIndex + 3; i < textList.length; i++) {
-        if (textList[i].startsWith("http")) {
-          break;
-        } else if (textList[i].startsWith("/sermon/")) {
-          break;
-        }
-        titleText += " ${textList[i]}";
-      }
-      // print("LOCALDATE:: $localDate");
+
       break;
 
     case 'TBS':
