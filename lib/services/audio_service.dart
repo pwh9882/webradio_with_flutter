@@ -41,6 +41,7 @@ class MyAudioHandler extends BaseAudioHandler
       playing: true,
       controls: [MediaControl.pause],
     ));
+
     await _player.play();
   }
 

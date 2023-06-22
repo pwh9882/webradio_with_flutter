@@ -31,7 +31,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  http: ^0.13.5
+  # http: ^0.13.5
+  dio: ^5.0.2
   cp949_codec: ^1.0.0
   audio_service: ^0.18.9
 

@@ -63,12 +63,13 @@ class _HomePageState extends State<HomePage> {
       album: selectedRadioChannelTitle,
       title: '',
       // artUri: Uri.file('images/radioIcon.png'),
-      artUri: await getImageFileFromAssets(),
+      // artUri: await getImageFileFromAssets(),
       // artUri: Uri.parse("file:///" "images/radioIcon.png")
       // artUri: myImageUri,
     );
     widget.audioHandler.clearQueue();
     widget.audioHandler.mediaItem.add(audioItem);
+    print("play!!");
     widget.audioHandler.playMediaItem(audioItem);
     isPlaying = true;
 

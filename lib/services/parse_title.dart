@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:cp949_codec/cp949_codec.dart';
+import 'package:dio/dio.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:webradio_with_flutter/models/radio_channel.dart';
@@ -8,7 +9,7 @@ import 'package:webradio_with_flutter/models/time_table_tbs.dart';
 
 Future<String> parseTitle(RadioChannel radio) async {
   var titleText = '리스트에서 선택해주세요';
-  http.Response response;
+  dynamic response;
   switch (radio.radioType) {
     case "SBS":
       response = await http.get(Uri.parse(radio.radioApiSlug!));
@@ -19,13 +20,18 @@ Future<String> parseTitle(RadioChannel radio) async {
       break;
 
     case "KBS":
-      response = await http.get(
-        Uri.parse(
-          "http://static.api.kbs.co.kr/mediafactory/v1/schedule/onair_now?rtype=jsonp&channel_code=21,22,24,25&local_station_code=00&callback=getChannelInfoList",
-        ),
+      // response = await http.get(
+      //   Uri.parse(
+      //     "http://static.api.kbs.co.kr/mediafactory/v1/schedule/onair_now?rtype=jsonp&channel_code=21,22,24,25&local_station_code=00&callback=getChannelInfoList",
+      //   ),
+      // );
+      response = await Dio().get(
+        "http://static.api.kbs.co.kr/mediafactory/v1/schedule/onair_now?rtype=jsonp&channel_code=21,22,24,25&local_station_code=00&callback=getChannelInfoList",
       );
+      // print(response);
+
       if (response.statusCode == 200) {
-        var jsonText = response.body;
+        var jsonText = response.data;
         jsonText = jsonText.substring(
           jsonText.indexOf("(") + 1,
           jsonText.indexOf(');'),
